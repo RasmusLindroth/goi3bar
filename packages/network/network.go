@@ -7,14 +7,13 @@ import (
 	"net"
 	"os/exec"
 	"regexp"
-	"strconv"
 )
 
 const Identifier = "network"
 
 const (
 	notConnected = "Not connected"
-	ethFormat    = "Connected: %v (%vMb/s)"
+	ethFormat    = "%v"
 	ipAddrRxStr  = "inet\\s+((\\d{1,3}\\.){3}\\d{1,3})"
 	isUpRxStr    = "state\\s+UP"
 )
@@ -109,7 +108,7 @@ func (d *BasicNetworkDevice) Generate() ([]i3.Output, error) {
 		}}, nil
 	}
 
-	speed := strconv.FormatUint(d.speed/1000, 10)
+	//speed := strconv.FormatUint(d.speed/1000, 10)
 
 	var ip string
 	if d.ip != nil {
@@ -118,7 +117,7 @@ func (d *BasicNetworkDevice) Generate() ([]i3.Output, error) {
 		ip = "Acquiring IP"
 	}
 
-	text := fmt.Sprintf(ethFormat, ip, speed)
+	text := fmt.Sprintf(ethFormat, ip)
 
 	return []i3.Output{{
 		Name:      Identifier,

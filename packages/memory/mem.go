@@ -3,7 +3,6 @@ package memory
 import (
 	i3 "github.com/denbeigh2000/goi3bar"
 
-	"code.cloudfoundry.org/bytefmt"
 	"github.com/shirou/gopsutil/mem"
 
 	"fmt"
@@ -16,7 +15,7 @@ type Memory struct {
 }
 
 const (
-	FormatString = "Mem: %v%% (%v/%v)"
+	FormatString = "Mem: %v%%"
 
 	DefaultWarnThreshold = 75
 	DefaultCritThreshold = 85
@@ -64,7 +63,7 @@ func (m Memory) Generate() ([]i3.Output, error) {
 	out := make([]i3.Output, 1)
 	out[0] = i3.Output{
 		Name:      m.Name,
-		FullText:  fmt.Sprintf(FormatString, percUsed, bytefmt.ByteSize(used), bytefmt.ByteSize(total)),
+		FullText:  fmt.Sprintf(FormatString, percUsed),
 		Color:     color,
 		Separator: true,
 	}
