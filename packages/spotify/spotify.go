@@ -40,9 +40,21 @@ func (s *Song) Update() {
 		return
 	}
 
-	songData := meta.Value().(map[string]dbus.Variant)
-	s.Artist = songData["xesam:artist"].Value().([]string)[0]
-	s.Title = songData["xesam:title"].Value().(string)
+	songData, ok := meta.Value().(map[string]dbus.Variant)
+	if !ok {
+		return
+	}
+	if artist, ok := songData["xesam:artist"]; ok {
+		tmp := artist.Value().([]string)
+		if len(tmp) < 1 {
+			return
+		}
+		s.Artist = artist.Value().([]string)[0]
+	}
+	if title, ok := songData["xesam:title"]; ok {
+		s.Title = title.Value().(string)
+	}
+
 }
 
 func (s *Song) Get() string {
