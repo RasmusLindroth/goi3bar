@@ -1,60 +1,109 @@
 package memory
 
 import (
-	"encoding/json"
-	"net/http"
-	"time"
+	"os/exec"
+	"strings"
 
 	i3 "github.com/denbeigh2000/goi3bar"
 
 	"fmt"
 )
 
-var myClient = &http.Client{Timeout: 10 * time.Second}
-
-func getJSON(url string, target interface{}) error {
-	r, err := myClient.Get(url)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
-
-	return json.NewDecoder(r.Body).Decode(target)
+var servers = map[string]string{
+	"mullvad-au1":  "Australia",
+	"mullvad-at1":  "Austria",
+	"mullvad-be1":  "Belgium",
+	"mullvad-br1":  "Brazil",
+	"mullvad-bg1":  "Bulgaria",
+	"mullvad-ca3":  "Canada",
+	"mullvad-ca1":  "Canada",
+	"mullvad-ca2":  "Canada",
+	"mullvad-cz1":  "Czech Republic",
+	"mullvad-dk1":  "Denmark",
+	"mullvad-fi1":  "Finland",
+	"mullvad-fr1":  "France",
+	"mullvad-de1":  "Germany",
+	"mullvad-de2":  "Germany",
+	"mullvad-de4":  "Germany",
+	"mullvad-de5":  "Germany",
+	"mullvad-hk1":  "Hong Kong",
+	"mullvad-in1":  "India",
+	"mullvad-it1":  "Italy",
+	"mullvad-jp1":  "Japan",
+	"mullvad-md1":  "Moldova",
+	"mullvad-nl1":  "Netherlands",
+	"mullvad-nl2":  "Netherlands",
+	"mullvad-nl3":  "Netherlands",
+	"mullvad-no1":  "Norway",
+	"mullvad-pl1":  "Poland",
+	"mullvad-ro1":  "Romania",
+	"mullvad-rs1":  "Serbia",
+	"mullvad-sg1":  "Singapore",
+	"mullvad-es1":  "Spain",
+	"mullvad-se3":  "Gothenburg",
+	"mullvad-se5":  "Gothenburg",
+	"mullvad-se4":  "Malmö",
+	"mullvad-se2":  "Stockholm",
+	"mullvad-se6":  "Stockholm",
+	"mullvad-se7":  "Stockholm",
+	"mullvad-se8":  "Stockholm",
+	"mullvad-ch1":  "Switzerland",
+	"mullvad-ch2":  "Switzerland",
+	"mullvad-gb2":  "UK",
+	"mullvad-gb4":  "UK",
+	"mullvad-gb5":  "UK",
+	"mullvad-gb3":  "UK",
+	"mullvad-us6":  "USA",
+	"mullvad-us4":  "USA",
+	"mullvad-us7":  "USA",
+	"mullvad-us11": "USA",
+	"mullvad-us12": "USA",
+	"mullvad-us2":  "USA",
+	"mullvad-us3":  "USA",
+	"mullvad-us1":  "USA",
+	"mullvad-us13": "USA",
+	"mullvad-us15": "USA",
+	"mullvad-us14": "USA",
+	"mullvad-us9":  "USA",
+	"mullvad-us5":  "USA",
+	"mullvad-ua1":  "Ukraine",
 }
 
-func callMullvad() string {
-	m := MullvadAPI{}
-	err := getJSON("https://am.i.mullvad.net/json", &m)
+func getMullvad() string {
+	res, err := exec.Command("ip", "link").Output()
 
 	if err != nil {
-		return "VPN ?"
+		return "VPN: ?"
 	}
 
-	if m.MullvadExitIP == true {
-		return m.MullvadHostname
+	lines := strings.Split(string(res), "\n")
+
+	var vpns []string
+	for _, line := range lines {
+		parts := strings.Split(line, " ")
+
+		if len(parts) < 2 || len(parts[1]) < 11 {
+			continue
+		}
+
+		intface := parts[1][0 : len(parts[1])-1]
+		if intface[:7] != "mullvad" {
+			continue
+		}
+
+		if val, ok := servers[intface]; ok {
+			key := strings.Split(intface, "-")[1]
+			intface = fmt.Sprintf("%s (%s)", val, key)
+		}
+
+		vpns = append(vpns, intface)
 	}
-	return "VPN down"
 
-}
-
-type MullvadAPI struct {
-	IP                string  `json:"ip"`
-	Country           string  `json:"country"`
-	City              string  `json:"city"`
-	Longitude         float64 `json:"longitude"`
-	Latitude          float64 `json:"latitude"`
-	MullvadExitIP     bool    `json:"mullvad_exit_ip"`
-	MullvadHostname   string  `json:"mullvad_exit_ip_hostname"`
-	Organization      string  `json:"organization"`
-	MullvadServerType string  `json:"mullvad_server_type"`
-	Blacklisted       struct {
-		Blacklisted bool `json:"blacklisted"`
-		Results     []struct {
-			Name        string `json:"name"`
-			Link        string `json:"link"`
-			Blacklisted bool   `json:"blacklisted"`
-		} `json:"results"`
-	} `json:"blacklisted"`
+	vpn := strings.Join(vpns, " | ")
+	if vpn == "" {
+		vpn = "down"
+	}
+	return fmt.Sprintf("VPN: %s", vpn)
 }
 
 type Mullvad struct {
@@ -67,7 +116,7 @@ const (
 
 func (m Mullvad) Generate() ([]i3.Output, error) {
 
-	mullvadStatus := callMullvad()
+	mullvadStatus := getMullvad()
 
 	var color string
 	switch mullvadStatus {
