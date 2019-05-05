@@ -99,7 +99,7 @@ func getMullvad() string {
 		vpns = append(vpns, intface)
 	}
 
-	vpn := strings.Join(vpns, " | ")
+	vpn := strings.Join(vpns, " - ")
 	if vpn == "" {
 		vpn = "down"
 	}
