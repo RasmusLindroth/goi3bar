@@ -68,9 +68,9 @@ func (b *Battery) update() error {
 	b.present = c.ValueOf("POWER_SUPPLY_PRESENT") == "1"
 	b.status = c.ValueOf("POWER_SUPPLY_STATUS")
 
-	fullCharge, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_ENERGY_FULL"), 32)
-	currentCharge, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_ENERGY_NOW"), 32)
-	powerUse, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_POWER_NOW"), 32)
+	fullCharge, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_CHARGE_FULL"), 32)
+	currentCharge, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_CHARGE_NOW"), 32)
+	powerUse, _ := strconv.ParseFloat(c.ValueOf("POWER_SUPPLY_CURRENT_NOW"), 32)
 
 	currentPerc, _ := strconv.Atoi(c.ValueOf("POWER_SUPPLY_CAPACITY"))
 
